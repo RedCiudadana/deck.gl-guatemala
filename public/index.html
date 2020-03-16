@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <script src="main.js"></script>
+    
+        <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBUMkktjTlRQ_6gsKfvrfQRfe4Hs9KWeG8&callback=initMap&libraries=visualization&v=3.34">
+        </script>
+    
+        <style>
+            body { margin: 0; }
+    
+            #map {
+                width: 100vw;
+                height: 100vh;
+            }
+
+            #tooltip {
+                position: absolute; 
+                background: white;
+                margin: 10px; padding: 10px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="map"></div>
+        <div id="tooltip"></div>
+    </body>
+</html>
