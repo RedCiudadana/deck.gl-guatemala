@@ -1,6 +1,6 @@
 import { GoogleMapsOverlay } from "@deck.gl/google-maps";
 import { HexagonLayer } from "@deck.gl/aggregation-layers";
-import { GeoJsonLayer, ScatterplotLayer } from "@deck.gl/layers";
+import { GeoJsonLayer, ScatterplotLayer, IconLayer } from "@deck.gl/layers";
 import { HeatmapLayer } from "@deck.gl/aggregation-layers";
 import Tabletop from "tabletop";
 
@@ -338,21 +338,90 @@ const googleMapStyle = [
   }
 ];
 
-const heatmap = () =>
+const ICON_MAPPING = {
+  zoom: { x: 0, y: 0, width: 200, height: 200, mask: false },
+  institution: { x: 200, y: 0, width: 200, height: 200, mask: false }
+};
+
+const icon = sourceData =>
+  new IconLayer({
+    id: "icon-layer",
+    data: sourceData,
+    pickable: true,
+    // iconAtlas and iconMapping are required
+    // getIcon: return a string
+    iconAtlas: "img/icons/global.png",
+    iconMapping: ICON_MAPPING,
+    getIcon: d => d.type,
+    sizeScale: 10,
+    sizeMinPixels: 40,
+    sizeMaxPixels: 80,
+    getPosition: d => {
+      console.log([d.longitude, d.latitude]);
+      return [d.longitude, d.latitude];
+    },
+    getSize: d => 10,
+    onHover: ({ object, x, y }) => {
+      const el = document.getElementById("tooltip");
+      if (object) {
+        el.innerHTML = `${object.info}`;
+        el.style.display = "block";
+        el.style.opacity = 0.9;
+        el.style.left = x + "px";
+        el.style.top = y + "px";
+      } else {
+        el.style.opacity = 0.0;
+      }
+    }
+    // getColor: d => [0, 140, 0],
+  });
+
+const scatterplot = sourceData =>
+  new ScatterplotLayer({
+    id: "scatter",
+    data: sourceData,
+    opacity: 0.95,
+    filled: true,
+    radiusMinPixels: 4,
+    radiusMaxPixels: 10,
+    getPosition: d => [d.longitude, d.latitude],
+    getFillColor: d => (d.victim > 0 ? [200, 0, 40, 150] : [255, 140, 0, 100])
+
+    // pickable: true,
+    // onHover: ({ object, x, y }) => {
+    //   const el = document.getElementById("tooltip");
+    //   if (object) {
+    //     const { status, number } = object;
+    //     el.innerHTML = `<h1>Información aquí</h1><p>Descripcion como van</p>`;
+    //     el.style.display = "block";
+    //     el.style.opacity = 0.9;
+    //     el.style.left = x + "px";
+    //     el.style.top = y + "px";
+    //   } else {
+    //     el.style.opacity = 0.0;
+    //   }
+    // },
+
+    // onClick: ({ object, x, y }) => {
+    //   window.open(`https://redciudadana.org/`);
+    // }
+  });
+
+const heatmap = sourceData =>
   new HeatmapLayer({
     id: "heat",
     data: sourceData,
     getPosition: d => [d.longitude, d.latitude],
-    getWeight: d => d.n_killed + d.n_injured * 0.5,
-    radiusPixels: 80
+    getWeight: d => d.victim,
+    radiusPixels: 10
   });
 
-const hexagon = () =>
+const hexagon = sourceData =>
   new HexagonLayer({
     id: "hex",
     data: sourceData,
     getPosition: d => [d.longitude, d.latitude],
-    getElevationWeight: d => d.n_killed * 2 + d.n_injured,
+    getElevationWeight: d => d.victim * 1,
     elevationScale: 100,
     extruded: true,
     radius: 1609,
@@ -362,23 +431,23 @@ const hexagon = () =>
   });
 
 window.initMap = () => {
-  console.log('Download data');
+  console.log("Download data");
   Tabletop.init({
     key: publicSpreadsheetUrl,
     simpleSheet: true
   }).then(dataSource => {
-    console.log('Creating map');
+    console.log("Creating map");
 
     const map = new google.maps.Map(document.getElementById("map"), {
       center: { lat: 14.61, lng: -90.51 },
       zoom: 8,
-      styles: googleMapStyle,
+      // styles: googleMapStyle,
       bearing: -27.396674584323023
     });
 
-    console.log('Processing data');
+    console.log("Processing data");
 
-    dataSource = dataSource.map((d) => {
+    dataSource = dataSource.map(d => {
       d.latitude = parseFloat(d.latitude);
       d.longitude = parseFloat(d.longitude);
       d.victim = parseFloat(d.victim);
@@ -386,43 +455,24 @@ window.initMap = () => {
       return d;
     });
 
-    console.log('Loading data');
+    console.log("Loading data");
 
     const overlay = new GoogleMapsOverlay({
-      layers: [
-        new ScatterplotLayer({
-          id: "scatter",
-          data: dataSource,
-          opacity: 0.95,
-          filled: true,
-          radiusMinPixels: 4,
-          radiusMaxPixels: 10,
-          getPosition: d => [d.longitude, d.latitude],
-          getFillColor: d =>
-            d.victim > 0 ? [200, 0, 40, 150] : [255, 140, 0, 100]
+      layers: []
+    });
 
-          // pickable: true,
-          // onHover: ({ object, x, y }) => {
-          //   const el = document.getElementById("tooltip");
-          //   if (object) {
-          //     const { status, number } = object;
-          //     el.innerHTML = `<h1>Información aquí</h1><p>Descripcion como van</p>`;
-          //     el.style.display = "block";
-          //     el.style.opacity = 0.9;
-          //     el.style.left = x + "px";
-          //     el.style.top = y + "px";
-          //   } else {
-          //     el.style.opacity = 0.0;
-          //   }
-          // },
+    window.overlay = overlay;
+    window.layers = [];
 
-          // onClick: ({ object, x, y }) => {
-          //   window.open(`https://redciudadana.org/`);
-          // }
-        })
-        // heatmap(),
-        // hexagon()
-      ]
+    console.log(overlay);
+
+    window.layers.push(scatterplot(dataSource));
+    // window.layers.push(heatmap(dataSource));
+    // window.layers.push(hexagon(dataSource));
+    window.layers.push(icon(dataSource));
+
+    overlay.setProps({
+      layers: window.layers
     });
 
     console.log("Add overlay to map");
