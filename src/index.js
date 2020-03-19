@@ -357,14 +357,11 @@ const icon = sourceData =>
     // getIcon: return a string
     iconAtlas: "img/icons/global.png",
     iconMapping: ICON_MAPPING,
-    getIcon: d => TYPE_MAPPING[d.type],
+    getIcon: d => TYPE_MAPPING[d.tipo],
     sizeScale: 10,
     sizeMinPixels: 40,
     sizeMaxPixels: 80,
-    getPosition: d => {
-      console.log([d.longitude, d.latitude]);
-      return [d.longitude, d.latitude];
-    },
+    getPosition: d => [d.longitude, d.latitude],
     getSize: d => 10,
     onHover: ({ object, x, y }) => {
       const el = document.getElementById("tooltip");
@@ -372,7 +369,7 @@ const icon = sourceData =>
         el.innerHTML = `${object.info}`;
         el.style.display = "block";
         el.style.opacity = 0.9;
-        el.style.left = x + "px";
+        el.style.left = (window.document.getElementById('bar').offsetWidth + x) + "px";
         el.style.top = y + "px";
       } else {
         el.style.opacity = 0.0;
@@ -452,7 +449,7 @@ window.initMap = () => {
       .filter((value, index, self) => self.indexOf(value) === index);
 
     const tipos = dataSource
-      .map((d) => d.type)
+      .map((d) => d.tipo)
       .filter((value, index, self) => self.indexOf(value) === index);
 
     console.log('Loading options');
@@ -474,6 +471,21 @@ window.initMap = () => {
     selectDepartamentos.options[0].innerHTML = "Todos";
     selectDepartamentos.disabled = false;
     selectDepartamentos.parentElement.className = "select"; // This remove loading-select class
+    selectDepartamentos.addEventListener('change', function(e) {
+      console.log('Filtering data...');
+
+      let dataSourceFiltered = dataSource;
+
+      if (e.target.value !== "any") {
+        dataSourceFiltered = dataSource.filter((d) => d.departamento === e.target.value);
+      }
+
+      window.layers = [];
+      window.layers.push(icon(dataSourceFiltered));
+      window.overlay.setProps({
+        layers: window.layers
+      });
+    });
 
     const selectMunicipios = window.document.getElementById('select-municipios');
 
@@ -488,6 +500,21 @@ window.initMap = () => {
     selectMunicipios.options[0].innerHTML = "Todos";
     selectMunicipios.disabled = false;
     selectMunicipios.parentElement.className = "select"; // This remove loading-select class
+    selectMunicipios.addEventListener('change', function(e) {
+      console.log('Filtering data...');
+
+      let dataSourceFiltered = dataSource;
+
+      if (e.target.value !== "any") {
+        dataSourceFiltered = dataSource.filter((d) => d.municipio === e.target.value);
+      }
+
+      window.layers = [];
+      window.layers.push(icon(dataSourceFiltered));
+      window.overlay.setProps({
+        layers: window.layers
+      });
+    });
 
     const selectTipos = window.document.getElementById('select-tipos');
 
@@ -502,6 +529,21 @@ window.initMap = () => {
     selectTipos.options[0].innerHTML = "Todos";
     selectTipos.disabled = false;
     selectTipos.parentElement.className = "select"; // This remove loading-select class
+    selectTipos.addEventListener('change', function(e) {
+      console.log('Filtering data...');
+
+      let dataSourceFiltered = dataSource;
+
+      if (e.target.value !== "any") {
+        dataSourceFiltered = dataSource.filter((d) => d.tipo === e.target.value);
+      }
+
+      window.layers = [];
+      window.layers.push(icon(dataSourceFiltered));
+      window.overlay.setProps({
+        layers: window.layers
+      });
+    });
 
     // Init map
 
@@ -533,7 +575,7 @@ window.initMap = () => {
 
     console.log(overlay);
 
-    window.layers.push(scatterplot(dataSource));
+    // window.layers.push(scatterplot(dataSource));
     // window.layers.push(heatmap(dataSource));
     // window.layers.push(hexagon(dataSource));
     window.layers.push(icon(dataSource));
