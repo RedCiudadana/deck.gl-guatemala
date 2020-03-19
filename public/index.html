@@ -5,36 +5,42 @@
         <script defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBUMkktjTlRQ_6gsKfvrfQRfe4Hs9KWeG8&callback=initMap&libraries=visualization&v=3.34">
         </script>
     
-        <style>
-            body { margin: 0; }
-    
-            #map {
-                width: 100vw;
-                height: 100vh;
-            }
-
-            #tooltip {
-                position: absolute;
-                color: #f2f2f2; 
-                background: #3e3e3e;
-                margin: 10px; padding: 10px;
-                border-radius: 10px;
-                font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-            }
-
-            #tooltip h1 {
-                font-size: 1rem;
-                margin: 0;
-            }
-
-            #tooltip p {
-                font-size: 0.8rem;
-                margin: 0;
-            }
-        </style>
+        <link rel="stylesheet" href="main.css">
     </head>
     <body>
-        <div id="map"></div>
+        <aside id="bar">
+            <h1>Mapa de salud COVID-19</h1>
+            <p>
+                Pequeña descrpción de lo que puedes encontrar aquí y de donde provienen los datos
+            </p>
+            <h2>Filtros</h2>
+            <h3>Departamento</h3>
+            <div class="select loading-select">
+                <span class="arr"></span>
+                <select id="select-departamentos" disabled>
+                    <option value="any"></option>
+                </select>
+            </div>
+            <h3>Municipio</h3>
+            <div class="select loading-select">
+                <span class="arr"></span>
+                <select id="select-municipios" disabled>
+                    <option value="any"></option>
+                </select>
+            </div>
+            <h3>Tipo</h3>
+            <div class="select loading-select">
+                <span class="arr"></span>
+                <select id="select-tipos" disabled>
+                    <option value="any"></option>
+                </select>
+            </div>
+            <h4>Algun tipo de feed news? Estadisticas totales número de hospitales habilitados...</h4>
+            <h5>Función para encontrar el centro más cercano?</h5>
+        </aside>
+        <main>
+            <div id="map"></div>
+        </main>
         <div id="tooltip"></div>
     </body>
 </html>

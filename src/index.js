@@ -338,6 +338,11 @@ const googleMapStyle = [
   }
 ];
 
+const TYPE_MAPPING = {
+  'Hospital': 'institution',
+  'Centro de pruebas': 'zoom'
+};
+
 const ICON_MAPPING = {
   zoom: { x: 0, y: 0, width: 200, height: 200, mask: false },
   institution: { x: 200, y: 0, width: 200, height: 200, mask: false }
@@ -352,7 +357,7 @@ const icon = sourceData =>
     // getIcon: return a string
     iconAtlas: "img/icons/global.png",
     iconMapping: ICON_MAPPING,
-    getIcon: d => d.type,
+    getIcon: d => TYPE_MAPPING[d.type],
     sizeScale: 10,
     sizeMinPixels: 40,
     sizeMaxPixels: 80,
@@ -437,6 +442,68 @@ window.initMap = () => {
     simpleSheet: true
   }).then(dataSource => {
     console.log("Creating map");
+
+    const municipios = dataSource
+      .map((d) => d.municipio)
+      .filter((value, index, self) => self.indexOf(value) === index);
+    
+    const departamentos = dataSource
+      .map((d) => d.departamento)
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    const tipos = dataSource
+      .map((d) => d.type)
+      .filter((value, index, self) => self.indexOf(value) === index);
+
+    console.log('Loading options');
+    /**
+     *
+     * Creating options for selects
+     *
+     */
+    const selectDepartamentos = window.document.getElementById('select-departamentos');
+
+    departamentos.forEach((departamento) => {
+      let option = document.createElement('option')
+      option.innerHTML = departamento;
+      option.value = departamento
+
+      selectDepartamentos.add(option);
+    });
+
+    selectDepartamentos.options[0].innerHTML = "Todos";
+    selectDepartamentos.disabled = false;
+    selectDepartamentos.parentElement.className = "select"; // This remove loading-select class
+
+    const selectMunicipios = window.document.getElementById('select-municipios');
+
+    municipios.forEach((municipio) => {
+      let option = document.createElement('option')
+      option.innerHTML = municipio;
+      option.value = municipio
+
+      selectMunicipios.add(option);
+    });
+
+    selectMunicipios.options[0].innerHTML = "Todos";
+    selectMunicipios.disabled = false;
+    selectMunicipios.parentElement.className = "select"; // This remove loading-select class
+
+    const selectTipos = window.document.getElementById('select-tipos');
+
+    tipos.forEach((tipo) => {
+      let option = document.createElement('option')
+      option.innerHTML = tipo;
+      option.value = tipo
+
+      selectTipos.add(option);
+    });
+
+    selectTipos.options[0].innerHTML = "Todos";
+    selectTipos.disabled = false;
+    selectTipos.parentElement.className = "select"; // This remove loading-select class
+
+    // Init map
 
     const map = new google.maps.Map(document.getElementById("map"), {
       center: { lat: 14.61, lng: -90.51 },
